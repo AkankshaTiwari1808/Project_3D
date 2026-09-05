@@ -1,0 +1,646 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <title>TOONHUB</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      overflow: hidden;
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 100vh;
+      overflow: hidden;
+      transition:
+        background-color 650ms cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: "Inter", sans-serif;
+    }
+
+    .viewport {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Grain overlay */
+    .grain {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+
+    /* Giant ghost text */
+    .ghost-text {
+      position: absolute;
+      inset-inline: 0;
+      top: 18%;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      user-select: none;
+      color: #fff;
+      font-family: "Anton", sans-serif;
+      font-size: clamp(90px, 28vw, 380px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    /* Brand */
+    .brand {
+      position: absolute;
+      top: 24px;
+      left: 16px;
+      z-index: 60;
+      color: #fff;
+      opacity: 0.9;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    /* Carousel */
+    .carousel {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+    }
+
+    .character {
+      position: absolute;
+      aspect-ratio: 0.6 / 1;
+      transform-origin: center center;
+      transition:
+        transform 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        filter 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        left 650ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, filter, opacity;
+      pointer-events: none;
+    }
+
+    .character img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom center;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* Center */
+    .character.center {
+      left: 50%;
+      bottom: 0;
+      height: 92%;
+      z-index: 20;
+      opacity: 1;
+      filter: blur(0);
+      transform: translateX(-50%) scale(1.68);
+    }
+
+    /* Left */
+    .character.left {
+      left: 30%;
+      bottom: 12%;
+      height: 28%;
+      z-index: 10;
+      opacity: 0.85;
+      filter: blur(2px);
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* Right */
+    .character.right {
+      left: 70%;
+      bottom: 12%;
+      height: 28%;
+      z-index: 10;
+      opacity: 0.85;
+      filter: blur(2px);
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* Back */
+    .character.back {
+      left: 50%;
+      bottom: 12%;
+      height: 22%;
+      z-index: 5;
+      opacity: 1;
+      filter: blur(4px);
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* Bottom-left content */
+    .bottom-left {
+      position: absolute;
+      left: 16px;
+      bottom: 24px;
+      z-index: 60;
+      width: min(320px, calc(100vw - 32px));
+    }
+
+    .figurines-title {
+      margin: 0 0 8px;
+      color: #fff;
+      opacity: 0.95;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .description {
+      margin: 0 0 20px;
+      color: #fff;
+      opacity: 0.85;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .navigation {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-button {
+      display: flex;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background-color 150ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-button:hover {
+      transform: scale(1.08);
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-button:active {
+      transform: scale(1.02);
+    }
+
+    .nav-button:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 4px;
+    }
+
+    .nav-button svg {
+      width: 26px;
+      height: 26px;
+      stroke-width: 2.25;
+    }
+
+    /* Bottom-right link */
+    .discover {
+      position: absolute;
+      right: 16px;
+      bottom: 24px;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      opacity: 0.95;
+      font-family: "Anton", sans-serif;
+      font-size: clamp(20px, 4vw, 56px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: opacity 200ms ease;
+    }
+
+    .discover:hover {
+      opacity: 1;
+    }
+
+    .discover svg {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+      stroke-width: 2.25;
+    }
+
+    @media (max-width: 639px) {
+      .character.center {
+        height: 60%;
+        bottom: 22%;
+        transform: translateX(-50%) scale(1.25);
+      }
+
+      .character.left {
+        left: 20%;
+        height: 16%;
+        bottom: 32%;
+        transform: translateX(-50%) scale(1);
+      }
+
+      .character.right {
+        left: 80%;
+        height: 16%;
+        bottom: 32%;
+        transform: translateX(-50%) scale(1);
+      }
+
+      .character.back {
+        left: 50%;
+        height: 13%;
+        bottom: 32%;
+        transform: translateX(-50%) scale(1);
+      }
+
+      .description {
+        display: none;
+      }
+
+      .figurines-title {
+        margin-bottom: 12px;
+      }
+
+      .navigation {
+        gap: 10px;
+      }
+    }
+
+    @media (min-width: 640px) {
+      .brand {
+        left: 32px;
+      }
+
+      .bottom-left {
+        left: 96px;
+        bottom: 80px;
+      }
+
+      .figurines-title {
+        margin-bottom: 12px;
+        font-size: 22px;
+      }
+
+      .description {
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .nav-button {
+        width: 64px;
+        height: 64px;
+      }
+
+      .nav-button svg {
+        width: 26px;
+        height: 26px;
+      }
+
+      .discover {
+        right: 40px;
+        bottom: 80px;
+      }
+
+      .discover svg {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    @media (min-width: 1600px) {
+      .bottom-left {
+        left: 6vw;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main
+    class="hero"
+    id="hero"
+    style="background-color: #F4845F;"
+  >
+    <div class="viewport">
+
+      <div class="grain" aria-hidden="true"></div>
+
+      <div class="ghost-text" aria-hidden="true">
+        3D SHAPE
+      </div>
+
+      <div class="brand">
+        TOONHUB
+      </div>
+
+      <div class="carousel" id="carousel"></div>
+
+      <section class="bottom-left">
+        <p class="figurines-title">
+          TOONHUB FIGURINES
+        </p>
+
+        <p class="description">
+          The artwork is stunning, shipped fully prepared. The finish is a vision, the 3D craft is flawless. Many thanks! Wishing you the win. Order now.
+        </p>
+
+        <div class="navigation">
+          <button
+            class="nav-button"
+            id="prevButton"
+            type="button"
+            aria-label="Previous figurine"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M19 12H5"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M12 19L5 12L12 5"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+
+          <button
+            class="nav-button"
+            id="nextButton"
+            type="button"
+            aria-label="Next figurine"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M5 12H19"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M12 5L19 12L12 19"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <a
+        class="discover"
+        href="#"
+        aria-label="Discover it"
+      >
+        <span>DISCOVER IT</span>
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M5 12H19"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M12 5L19 12L12 19"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </a>
+
+    </div>
+  </main>
+
+  <script>
+    const IMAGES = [
+      {
+        src: "https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/1.02464a56.png",
+        bg: "#F4845F",
+        panel: "#F79B7F"
+      },
+      {
+        src: "https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/2.b977faab.png",
+        bg: "#6BBF7A",
+        panel: "#85CC92"
+      },
+      {
+        src: "https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/3.4df853b4.png",
+        bg: "#E882B4",
+        panel: "#ED9DC4"
+      },
+      {
+        src: "https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/4.4457fbce.png",
+        bg: "#6EB5FF",
+        panel: "#8DC4FF"
+      }
+    ];
+
+    const hero = document.getElementById("hero");
+    const carousel = document.getElementById("carousel");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
+
+    let activeIndex = 0;
+    let isAnimating = false;
+    let isMobile = window.innerWidth < 640;
+
+    /*
+     * Preload all four images on mount.
+     */
+    IMAGES.forEach((item) => {
+      const image = new Image();
+      image.src = item.src;
+    });
+
+    /*
+     * Create the four carousel items.
+     */
+    IMAGES.forEach((item, index) => {
+      const character = document.createElement("div");
+      character.className = "character";
+      character.dataset.index = index;
+
+      const image = document.createElement("img");
+      image.src = item.src;
+      image.alt = "";
+      image.draggable = false;
+
+      character.appendChild(image);
+      carousel.appendChild(character);
+    });
+
+    const characters = Array.from(
+      document.querySelectorAll(".character")
+    );
+
+    function getRoles() {
+      return {
+        center: activeIndex,
+        left: (activeIndex + 3) % 4,
+        right: (activeIndex + 1) % 4,
+        back: (activeIndex + 2) % 4
+      };
+    }
+
+    function updateCarousel() {
+      const roles = getRoles();
+
+      hero.style.backgroundColor = IMAGES[activeIndex].bg;
+
+      characters.forEach((character) => {
+        const index = Number(character.dataset.index);
+
+        character.classList.remove(
+          "center",
+          "left",
+          "right",
+          "back"
+        );
+
+        if (index === roles.center) {
+          character.classList.add("center");
+        } else if (index === roles.left) {
+          character.classList.add("left");
+        } else if (index === roles.right) {
+          character.classList.add("right");
+        } else if (index === roles.back) {
+          character.classList.add("back");
+        }
+      });
+    }
+
+    function navigate(direction) {
+      if (isAnimating) {
+        return;
+      }
+
+      isAnimating = true;
+
+      if (direction === "next") {
+        activeIndex = (activeIndex + 1) % 4;
+      } else {
+        activeIndex = (activeIndex + 3) % 4;
+      }
+
+      updateCarousel();
+
+      window.setTimeout(() => {
+        isAnimating = false;
+      }, 650);
+    }
+
+    prevButton.addEventListener("click", () => {
+      navigate("prev");
+    });
+
+    nextButton.addEventListener("click", () => {
+      navigate("next");
+    });
+
+    function updateMobileState() {
+      isMobile = window.innerWidth < 640;
+
+      /*
+       * Re-apply the active role classes so the responsive CSS
+       * immediately takes effect after a resize.
+       */
+      updateCarousel();
+    }
+
+    window.addEventListener("resize", updateMobileState);
+
+    /*
+     * Optional keyboard navigation mirrors the carousel controls.
+     */
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        navigate("prev");
+      } else if (event.key === "ArrowRight") {
+        navigate("next");
+      }
+    });
+
+    /*
+     * Initial render.
+     */
+    updateCarousel();
+  </script>
+</body>
+</html>
+```
